@@ -59,7 +59,7 @@ for entry in obs:
 	ax.legend()
 
 	#save plot under entry name
-	name = entry.replace('/', '_')
+	name = "comp_plots/" + entry.replace('/', '_') + ".pdf"
 	print(name)
 	plt.show()	
 	fig.savefig(name, format='pdf')

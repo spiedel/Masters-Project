@@ -46,9 +46,9 @@ print(pa.reference)
 
  
 #plotting noValues*noValues with given x and y ranges
-noValues = 15
-xBins = np.linspace(-3, 3, noValues)
-yBins = np.linspace(-3, 3, noValues)
+noValues = 30
+xBins = np.linspace(-10, 5, noValues)
+yBins = np.linspace(-10, 5, noValues)
 
 i = 0
 j = 0
@@ -81,6 +81,6 @@ cont = ax.contourf(xBins, yBins, pArray, [0.65, 0.95, 0.99, 1.0])
 fig.colorbar(cont, ax=ax)
 
 plt.show()
-fig.savefig("contours_p_{}.png".format(noValues))
+fig.savefig("contour_plots/contours_p_{}.png".format(noValues))
 
 
