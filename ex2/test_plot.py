@@ -26,6 +26,7 @@ wcName = "All Wilson Coefficients set to 1"
 
 print(pa.reference.columns)
 obs = set([x[0] for x in pa.reference.index])
+
 #obs = pa.reference.index
 print(obs)
 
@@ -39,20 +40,22 @@ for entry in obs:
 	print(entry)
 	
 	#define data to be plotted for each observable
-	smData = data.loc[entry]
-	smBins = smData.index
+	measuredData = data.loc[entry]
+	measuredBins = measuredData.index
 	wcBins = wc.loc[entry].index
 	
-	smValues = data.loc[(entry, 'value')]
-	smErr = data.loc[(entry, 'error')]
+	measuredValues = data.loc[(entry, 'value')]
+	measuredErr = data.loc[(entry, 'error')]
 	wcValues = wc.loc[(entry,'value')]
 	wcErr = wc.loc[(entry, 'error')]
 
-	print(smBins)
-	print(smValues)
+	print(measuredBins)
+	print(measuredValues)
 
 	#plot standard model against one wc set to one
-	plotHist(ax, smBins, smValues.values, "data", "b")
+	plotHist(ax, measuredBins, measuredValues.values, "data", "b")
+	plotHist(ax, measuredBins, measuredValues.values + measuredErr.values, "error up", "b", "--")
+	plotHist(ax, measuredBins, measuredValues.values - measuredErr.values, "error down", "b", "--")
 	plotHist(ax, wcBins, wcValues.values, wcName, "r")
 
 	#create legend
