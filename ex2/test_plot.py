@@ -52,10 +52,13 @@ for entry in obs:
 	print(measuredBins)
 	print(measuredValues)
 
+	binCent = [(x[0]+x[1])/2 for x in measuredBins]
+
 	#plot standard model against one wc set to one
 	plotHist(ax, measuredBins, measuredValues.values, "data", "b")
-	plotHist(ax, measuredBins, measuredValues.values + measuredErr.values, "error up", "b", "--")
-	plotHist(ax, measuredBins, measuredValues.values - measuredErr.values, "error down", "b", "--")
+	ax.errorbar(binCent, measuredValues.values, yerr=measuredErr.values, fmt="o")
+	#plotHist(ax, measuredBins, measuredValues.values + measuredErr.values, "error up", "b", "--")
+	#plotHist(ax, measuredBins, measuredValues.values - measuredErr.values, "error down", "b", "--")
 	plotHist(ax, wcBins, wcValues.values, wcName, "r")
 
 	#create legend

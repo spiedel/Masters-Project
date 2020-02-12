@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import chisquare, chi2
 from scipy import stats
 
-def chi2_local(observed, expected):
+def chi2_local(observed, expected, error):
 	#function to calculate chi2 from two arrays
 	if len(observed) != len(expected):
 		print("Inputted data doesn't match length")
@@ -14,7 +14,7 @@ def chi2_local(observed, expected):
 	chi2_sum = 0.
 	for i in range(len(observed)):
 	# calculate each chi2 part
-		chi2_part = (observed[i]-expected[i])**2/expected[i]
+		chi2_part = (observed[i]-expected[i])**2/error[i]
 		chi2_sum = chi2_sum + chi2_part
 
 	return chi2_sum
@@ -23,7 +23,7 @@ def chi2_local(observed, expected):
 def getPred(fh, wcValue1, wcValue2):
 	#funtion for predicting the theory values for a given pair of wilson coefficients
 	#returns
-	prediction = fh.predict(G=wcValue1, qq3_i33i=wcValue2)#, uG_33=wcValue2)
+	prediction = fh.predict(G=wcValue1, uG_33=wcValue2)#qq3_i33i=wcValue2)
 	return [x[0] for x in prediction.values]
 
 
@@ -36,11 +36,11 @@ fh = FitHandler(pa)
 #get data values and error
 obs = [x[0] for x in fh.reference.values]
 err = [x[1] for x in fh.reference.values]
+print(err)
 
-
-print(pa.xr.obs)
-print(pa.reference)
-print(fh.reference)
+#print(pa.xr.obs)
+#print(pa.reference)
+#print(fh.reference)
 #print(pa.atpoint(G=1, qq3_i33i=1))
 #print(chisquare(obs, [x[0] for x in pa.atpoint(G=3, qq3_i33i=3).values]))
 
@@ -48,9 +48,9 @@ print(fh.reference)
 
  
 #plotting noValues*noValues with given x and y ranges
-noValues = 2
-xBins = np.linspace(-10, 5, noValues)
-yBins = np.linspace(-10, 5, noValues)
+noValues = 30
+xBins = np.linspace(-5, 5, noValues)
+yBins = np.linspace(-2, 2, noValues)
 
 i = 0
 j = 0
@@ -58,14 +58,14 @@ chi2Array = np.zeros((noValues, noValues))
 for x in xBins:
 	for y in yBins:		
 		pred = getPred(fh, x, y)
-		chi2Value, pValue = chisquare(obs, f_exp=pred)
+		chi2Value = chi2_local(obs, pred, err)
 		chi2Array[i][j] = chi2Value
 		j+=1
 	j=0
 	i+=1
 print(pred)
 
-#print(chi2Array)
+print(chi2Array)
 #Calculate delta chi2
 
 chi2Array = chi2Array - chi2Array.min()
@@ -73,8 +73,8 @@ chi2Array = chi2Array - chi2Array.min()
 #calculate p
 pArray = chi2.sf(chi2Array, 2)
 
-#print(chi2Array)
-#print(pArray)
+print(chi2Array)
+print(pArray)
 
 #plot
 fig, ax = plt.subplots()
