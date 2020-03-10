@@ -20,16 +20,17 @@ def chi2_local(observed, expected, error):
 	return chi2_sum
 
 
-def getPred(fh, wcValue1, wcValue2):
+
+def getPred(fh, wcdict):
 	#funtion for predicting the theory values for a given pair of wilson coefficients
 	#{'qq3_i33i', 'G', 'qq1_ii33', 'uu_i33i', 'qu1_33ii', 'qu8_33ii', 'qq1_i33i', 'qu8_ii33', 'qq3_ii33', 'uG_33', 'ud1_33ii', 'qd8_33ii', 'qu1_ii33', 'uu_ii33', 'qd1_33ii', 'ud8_33ii'}
 	#returns
-	prediction = fh.predict(qq3_i33i=wcValue1, qq1_i33i=wcValue2)#iqq3_i33i=wcValue2)#, uG_33=wcValue2)#
+	prediction = fh.predict(**wcdict)#iqq3_i33i=wcValue2)#, uG_33=wcValue2)#
 	return [x[0] for x in prediction.values]
 
 
-wilco1 = "qq3\_i33i"
-wilco2 = "qq1\_i33i"
+wilco1 = "qq3_i33i"
+wilco2 = "qq1_i33i"
 
 #generate prediction array from data
 #af = AnalysisFrame.from_hdf('/nfs/topfitter/sbrown/HDF/analyses/ATLAS_2017_I1604029/ATLAS_2017_I1604029.h5')
@@ -41,6 +42,11 @@ fh = FitHandler(pa)
 obs = [x[0] for x in fh.reference.values]
 err = [x[1] for x in fh.reference.values]
 print(err)
+
+wcdict = {}
+wcnames = pa.wilcos
+for name in wcnames:
+	wcdict[name] = 0.
 
 print(pa.wilcos)
 #print(pa.reference)
@@ -60,8 +66,10 @@ i = 0
 j = 0
 chi2Array = np.zeros((noValues, noValues))
 for x in xBins:
-	for y in yBins:		
-		pred = getPred(fh, x, y)
+	for y in yBins:
+		wcdict[wilco1] = x
+		wcdict[wilco2] = y
+		pred = getPred(fh, wcdict)
 		chi2Value = chi2_local(obs, pred, err)
 		chi2Array[i][j] = chi2Value
 		j+=1
@@ -77,6 +85,7 @@ chi2Array = chi2Array - chi2Array.min()
 #calculate p
 pArray = chi2.sf(chi2Array, 2)
 
+np.savetxt("pArray.txt", pArray)
 #print(chi2Array)
 #print(pArray)
 
@@ -89,4 +98,4 @@ fig.colorbar(cont, ax=ax)
 plt.xlabel(wilco1)
 plt.ylabel(wilco2)
 plt.show()
-fig.savefig("contour_plots/contours_p_{}_{}.png".format(wilco1.replace("\\",""), wilco2.replace("\\","")))
+fig.savefig("contour_plots/contours_p_{}_{}.png".format(wilco1, wilco2))
