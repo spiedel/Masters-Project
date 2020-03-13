@@ -14,62 +14,67 @@ yoda.plotting.setup_mpl()
 
 def analyse(wilco1="uu_i33i", wilco2="uu_ii33", afPath='../../HDF/CMS_2018_I1662081.h5'):
 
+    #initialise topfitter objects
     af = AnalysisFrame.from_hdf(afPath)
     pa = PredictionArray(af.xr)
     fh = FitHandler(pa)
 
     #get data values and error
     obs = np.array([x[0] for x in fh.reference.values])
-    err = np.array([x[1] for x in fh.reference.values])
+    #err = np.array([x[1] for x in fh.reference.values])
     print(fh.reference)
 
+    #initialise dict for wilson coefficients
     wcdict = {}
     wcnames = pa.wilcos
     for name in wcnames:
         wcdict[name] = 0.
 
-
+    #load in analysis from file
     loadArr = np.loadtxt("int_vals_maj.txt")
-    pred = np.zeros((4, loadArr[0].size, len(obs)))
-    lenAlongAx = []
+
+    #initialise loop variables
+    #pred = np.zeros((loadArr[0].size, len(obs)))
     i = 0
 
-    ret = []
-    for wc1Values, wc2Values in zip(loadArr[::2], loadArr[1::2]):
+    mutInfs = np.zeros((4,len(obs)))
+    for lens, wc1Values, wc2Values in zip(loadArr[::3], loadArr[1::3], loadArr[2::3]):
         j = 0
-        #pred = np.zeros((len(wc1Values), len(obs)))
-        #chitot = np.zeros(len(wc1Values))
         
+        pred = np.zeros((wc1Values.size, len(obs)))
+
+        # loop through x y values and get bin predictions there
         for wc1,wc2 in zip(wc1Values,wc2Values):
             wcdict[wilco1] = wc1
             wcdict[wilco2] = wc2
 
             binValues = np.array(getPred(fh, wcdict))
             
-            pred[i][j] = binValues    
+            pred[j] = binValues
+             
             j += 1
+
+        mutInfs[i] = mutual_info_regression(pred, lens)
 
         i += 1
 
-    
-    ret = mutual_info_regression(pred, )
 
-    return ret , fh.reference
+    return mutInfs , fh.reference
 
 
 ret, ref = analyse()
 
-length = len(ret)
-# h = yoda.Histo1D(len(ret), 0, len(ret)-1, "foo")
+length = len(ret[0])
+h = yoda.Histo1D(length, 0, length-1, "foo")
 
-# for i in range(len(ret)):
-#     h.fillBin(i, ret[i])
-# #yoda.plotting.mk_figaxes_1d()
-# fig, ax = yoda.plotting.plot_hist_1d(h)
-plt.xticks(range(len(ret)), ref.index, rotation='vertical')
+for i in range(length):
+    h.fillBin(i, ret[0][i])
+#yoda.plotting.mk_figaxes_1d()
+fig, ax = yoda.plotting.plot_hist_1d(h)
+plt.xticks(range(length), ref.index, rotation='vertical')
 #plt.margins(0.5)
 #plt.subplots_adjust(bottom=0.5)
-plt.savefig('mutual info')
+plt.savefig('mutual_info')
 plt.show()
 
 
