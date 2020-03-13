@@ -27,20 +27,22 @@ def fitEllipse(x,y):
 
 def getAngle(ellipseConsts):
 	""" Return rotation angle in radians of the fitted ellipse given the ellipse constants from fitting
-	Rotation gives anticlockwise rotation from positive x axis to semi major axis
+	Rotation gives anticlockwise rotation from positive x axis to major axis
 	Assumes a != c - ie it is not a circle
 	 """
 	a, b, c = ellipseConsts[0], ellipseConsts[1]/2, ellipseConsts[2]
 	if b == 0:
 		if a < c:
-			return 0
+			angle = 0
 		else:
-			return 0.5 * np.pi
+			angle = 0.5 * np.pi
 	else:
 		if a < c:
-			return 0.5 * np.arctan(2*b/(a-c))
+			angle = 0.5 * np.arctan(2*b/(a-c))
 		else:
-			return 0.5 * ( np.pi + np.arctan(2*b/(a-c)) )
+			angle = 0.5 * ( np.pi + np.arctan(2*b/(a-c)) )
+	
+	return angle
 
 
 def getAxLen(ellipseConsts):
@@ -88,7 +90,7 @@ def getCoordsInt(lenNarrow, lenWide, xCen, yCen, angle):
 	xRotNeg, yRotNeg = rotatePoints(negInt, yNeg, angle)
 
 
-	return xRotPos+xCen, yRotPos+yCen, xRotNeg, yRotNeg
+	return xRotPos+xCen, yRotPos+yCen, xRotNeg+xCen, yRotNeg+yCen
 
 #calculate p
 pArray = np.loadtxt("pArray.txt")
@@ -119,7 +121,7 @@ yNarrow = np.array([x[1] for x in narrowCont])
 
 aWide = fitEllipse(xWide, yWide)
 aNarrow = fitEllipse(xNarrow, yNarrow)
-theta = getAngle(aNarrow)
+theta = getAngle(aWide)
 lenWideMaj, lenWideMin = getAxLen(aWide)
 lenNarrowMaj, lenNarrowMin = getAxLen(aNarrow)
 xCen, yCen = getAxCen(aNarrow)
@@ -131,11 +133,18 @@ print(lenNarrowMaj)
 #get positive interpolation xValues
 xPos, yPos, xNeg, yNeg = getCoordsInt( lenNarrowMaj, lenWideMaj, xCen, yCen, theta)
 
+#get for minor axis
+xPosMin, yPosMin, xNegMin, yNegMin = getCoordsInt( lenNarrowMin, lenWideMin, xCen, yCen, theta-np.pi/2)
+
 
 fig.colorbar(cont, ax=ax)
-ax.scatter(xPos, yPos, c = 'g', marker='o')
-ax.scatter(xNeg, yNeg, c = 'g', marker='o')
+ax.scatter(xPos, yPos, c = 'g', marker='x')
+ax.scatter(xNeg, yNeg, c = 'g', marker='x')
+ax.scatter(xPosMin, yPosMin, c = 'r', marker='x')
+ax.scatter(xNegMin, yNegMin, c = 'r', marker='x')
 plt.xlabel(wilco1)
 plt.ylabel(wilco2)
 plt.show()
 fig.savefig("contour_plots/rotationtest_{}_{}".format(wilco1.replace("_",""), wilco2.replace("_","")))
+
+np.savetxt("int_vals_maj.txt", np.array([xPos, yPos, xNeg, yNeg, xPosMin, xNegMin, yPosMin, yNegMin]))
