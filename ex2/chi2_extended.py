@@ -131,13 +131,15 @@ print(lenNarrowMaj)
 
 #get positive interpolation xValues
 numPoints = 50
-xPos, yPos, xNeg, yNeg = getCoordsInt( numPoints, lenNarrowMaj, lenWideMaj, xCen, yCen, theta)
+xPos, yPos, xNeg, yNeg = getCoordsInt( 
+	numPoints, lenNarrowMaj, lenWideMaj, xCen, yCen, theta )
+
 majPoints = np.linspace(lenNarrowMaj, lenWideMaj, numPoints)
-minPoints = np.linspace(lenNarrowMin, lenWideMin, numPoints)
 
 #get for minor axis
-xPosMin, yPosMin, xNegMin, yNegMin = getCoordsInt( numPoints, lenNarrowMin, lenWideMin, xCen, yCen, theta-np.pi/2)
-
+xPosMin, yPosMin, xNegMin, yNegMin = getCoordsInt( 
+	numPoints, lenNarrowMin, lenWideMin, xCen, yCen, theta-np.pi/2 )
+minPoints = np.linspace(lenNarrowMin, lenWideMin, numPoints)
 
 fig.colorbar(cont, ax=ax)
 ax.scatter(xPos, yPos, c = 'g', marker='x')
@@ -149,4 +151,6 @@ plt.ylabel(wilco2)
 plt.show()
 fig.savefig("contour_plots/rotationtest_{}_{}".format(wilco1.replace("_",""), wilco2.replace("_","")))
 
-np.savetxt("int_vals_maj.txt", np.array([majPoints, xPos, yPos, majPoints, xNeg, yNeg, minPoints, xPosMin, xNegMin, minPoints, yPosMin, yNegMin]))
+np.savetxt( "int_vals_maj.txt", np.array( [ 
+		majPoints, xPos, yPos, majPoints, xNeg, yNeg, minPoints, 
+		xPosMin, xNegMin, minPoints, yPosMin, yNegMin ] ) )

@@ -1,28 +1,47 @@
 import numpy as np
-import scipy as sp
-from topfitter.analysis.frames import PredictionArray, AnalysisFrame
-from topfitter.fitting import FitHandler
+import yoda
 from numpy import corrcoef
 from sklearn.feature_selection import mutual_info_regression
 import matplotlib.pyplot as plt
-import yoda
+from topfitter.analysis.frames import PredictionArray, AnalysisFrame
+from topfitter.fitting import FitHandler
+from chi2 import getPred
 
+def plotHist(ax, bins, values, label="", colour='b', linestyle='-'):
+    #function to plot a stepped histogram given bins and bin values
+	ax.plot(bins,
+		np.append(values, values[-1]),
+		ds='steps-post', label=label, ls=linestyle, color=colour)
 
-from chi2 import chi2_local, getPred
-
-yoda.plotting.setup_mpl()
+def plotMut(mutInfReg, indexRef, uniqRef, name, w1, w2):
+    #function to plot the mutual info score with appropriate labelling
+    length = len(mutInfReg[0])
+    bins = range(0, length+1, 1)
+    print(bins)
+    fig, ax = plt.subplots()
+    plotHist(ax, bins, mutInfReg[0])
+    plotHist(ax,bins,mutInfReg[1], colour='r')
+    plt.xticks(indexRef, uniqRef, fontsize=10, rotation=90)
+    plt.subplots_adjust(bottom=0.2)
+    plt.xlabel("Bins of observables")
+    plt.ylabel("Mutual info regression score")
+    plt.title("Mutual info for the {} axis of ellipse and for wilcos {} and {}".format(name, w1, w2),
+               fontsize=12)
+    plt.savefig('mutual_info_{}'.format(name))
+    plt.show()
+    plt.close(fig)
 
 def analyse(wilco1="uu_i33i", wilco2="uu_ii33", afPath='../../HDF/CMS_2018_I1662081.h5'):
+    #get the mutual info score given the list of points in the file
 
     #initialise topfitter objects
     af = AnalysisFrame.from_hdf(afPath)
     pa = PredictionArray(af.xr)
     fh = FitHandler(pa)
 
-    #get data values and error
+    #get data values and erroraf 
     obs = np.array([x[0] for x in fh.reference.values])
     #err = np.array([x[1] for x in fh.reference.values])
-    print(fh.reference)
 
     #initialise dict for wilson coefficients
     wcdict = {}
@@ -37,6 +56,7 @@ def analyse(wilco1="uu_i33i", wilco2="uu_ii33", afPath='../../HDF/CMS_2018_I1662
     #pred = np.zeros((loadArr[0].size, len(obs)))
     i = 0
 
+    #array to store mutual info values for each pos/neg axis
     mutInfs = np.zeros((4,len(obs)))
     for lens, wc1Values, wc2Values in zip(loadArr[::3], loadArr[1::3], loadArr[2::3]):
         j = 0
@@ -59,25 +79,36 @@ def analyse(wilco1="uu_i33i", wilco2="uu_ii33", afPath='../../HDF/CMS_2018_I1662
         i += 1
 
 
-    return mutInfs , fh.reference
+    return mutInfs , fh.reference.index
+
+def main():
+    wilco1 = "qq3_i33i"
+    wilco2 = "qq1_i33i"
+    mutInfReg, ref = analyse(wilco1=wilco1, wilco2=wilco2)
+
+    #get unique copies of each index
+    uniqRef = ref.levels[0]
+    #get index of first appearance of each
+    refFull = ref.get_level_values(0).tolist()
+
+    indexRef = [refFull.index(refPart) for refPart in uniqRef]
+
+    #format values in uniqRef for display
+    #   replaces _ with \_, removes all the values before the variable name,
+    #   and drops the normed from the end
+    uniqRef = [r'\_'.join(x.replace('_', r'\_').split('/')[1].split(r'\_')[:-1]) for x in uniqRef]
+
+    #plot on histogram
+    plotMut(mutInfReg[0:2], indexRef, uniqRef, "maj", 
+            wilco1.replace('_', r'\_'), wilco2.replace('_', r'\_'))
+    plotMut(mutInfReg[2:4], indexRef, uniqRef, "min", 
+            wilco1.replace('_', r'\_'), wilco2.replace('_', r'\_'))
 
 
-ret, ref = analyse()
+    #fig, ax = plt.subplots()
 
-length = len(ret[0])
-h = yoda.Histo1D(length, 0, length-1, "foo")
+    #plt.show()
+    return 0
 
-for i in range(length):
-    h.fillBin(i, ret[0][i])
-#yoda.plotting.mk_figaxes_1d()
-fig, ax = yoda.plotting.plot_hist_1d(h)
-plt.xticks(range(length), ref.index, rotation='vertical')
-#plt.margins(0.5)
-#plt.subplots_adjust(bottom=0.5)
-plt.savefig('mutual_info')
-plt.show()
-
-
-#fig, ax = plt.subplots()
-
-#plt.show()
+if __name__ == "__main__":
+    main()
