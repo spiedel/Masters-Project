@@ -72,7 +72,7 @@ if __name__ == "__main__":
 			wcdict[wilco2] = y
 			pred = np.array(getPred(fh, wcdict))
 			chi2Value = chi2_local(obs, pred, err)
-			chi2Array[i][j] = chi2Value
+			chi2Array[i,j] = chi2Value
 			j+=1
 		j=0
 		i+=1

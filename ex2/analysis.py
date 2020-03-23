@@ -17,12 +17,11 @@ def plotMut(mutInfReg, indexRef, uniqRef, name, w1, w2):
     #function to plot the mutual info score with appropriate labelling
     length = len(mutInfReg[0])
     bins = range(0, length+1, 1)
-    print(bins)
     fig, ax = plt.subplots()
     plotHist(ax, bins, mutInfReg[0])
     plotHist(ax,bins,mutInfReg[1], colour='r')
-    plt.xticks(indexRef, uniqRef, fontsize=10, rotation=90)
-    plt.subplots_adjust(bottom=0.2)
+    plt.xticks(indexRef, uniqRef, fontsize=10, rotation=0, ha='left')
+    #plt.subplots_adjust(bottom=0.2)
     plt.xlabel("Bins of observables")
     plt.ylabel("Mutual info regression score")
     plt.title("Mutual info for the {} axis of ellipse and for wilcos {} and {}".format(name, w1, w2),
@@ -41,7 +40,7 @@ def analyse(wilco1="uu_i33i", wilco2="uu_ii33", afPath='../../HDF/CMS_2018_I1662
 
     #get data values and erroraf 
     obs = np.array([x[0] for x in fh.reference.values])
-    #err = np.array([x[1] for x in fh.reference.values])
+    err = np.array([x[1] for x in fh.reference.values])
 
     #initialise dict for wilson coefficients
     wcdict = {}
@@ -59,20 +58,29 @@ def analyse(wilco1="uu_i33i", wilco2="uu_ii33", afPath='../../HDF/CMS_2018_I1662
     #array to store mutual info values for each pos/neg axis
     mutInfs = np.zeros((4,len(obs)))
     for lens, wc1Values, wc2Values in zip(loadArr[::3], loadArr[1::3], loadArr[2::3]):
-        j = 0
         
         pred = np.zeros((wc1Values.size, len(obs)))
 
         # loop through x y values and get bin predictions there
-        for wc1,wc2 in zip(wc1Values,wc2Values):
+        for j, (wc1,wc2) in enumerate(zip(wc1Values,wc2Values)):
             wcdict[wilco1] = wc1
             wcdict[wilco2] = wc2
 
             binValues = np.array(getPred(fh, wcdict))
-            
-            pred[j] = binValues
-             
-            j += 1
+
+            pred[j] = np.random.normal(binValues, err)
+
+
+
+        #fig, ax = plt.subplots()
+        #print (pred.shape)
+        #plotHist(ax, range(len(wc1Values)+1),pred[:,13])
+        #plt.show()
+        #ax.cla()
+        #fig, ax = plt.subplots()
+        #plotHist(ax, range(len(obs)+1), pred[13])
+        #plt.show()
+        #plt.close(fig)
 
         mutInfs[i] = mutual_info_regression(pred, lens)
 
