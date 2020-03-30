@@ -4,6 +4,8 @@ ex2/chi2_extended.txt
 ex2/int_vals_maj.txt
 ex2/pArray.txt
 ex2/topfitterEnv/
+*.png
+*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
