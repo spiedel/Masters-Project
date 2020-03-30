@@ -61,9 +61,9 @@ def getAxLen(ellipseConsts):
 	minLen = np.sqrt(denom/minNum)
 
 	if majLen < minLen:
-		return minLen, majLen
+		return minLen, majLen, True
 	else:
-		return majLen, minLen
+		return majLen, minLen, False
 
 def getAxCen(ellipseConsts):
 	""" Returns lenth of the two axes of the ellipse given the ellipse constans from fitting
@@ -91,66 +91,74 @@ def getCoordsInt(number, lenNarrow, lenWide, xCen, yCen, angle):
 
 	return xRotPos+xCen, yRotPos+yCen, xRotNeg+xCen, yRotNeg+yCen
 
-#calculate p
-pArray = np.loadtxt("pArray.txt")
-wilco1 = "qq3_i33i"
-wilco2 = "qq1_i33i"
 
-#plotting noValues*noValues with given x and y ranges
-noValues = 40
-xBins = np.linspace(-3, 3, noValues)
-yBins = np.linspace(-3, 3, noValues)
+def getCoordsFromEllipse(xBins, yBins, pArray, wilco1="qq3_i33i", wilco2="qq1_i33i"):
+	#plot
+	fig, ax = plt.subplots()
+	#cont = ax.contourf(xBins, yBins, chi2Array)
+	cont = ax.contour(xBins, yBins, pArray, [0.05, 0.35]) 
+	#print(cont.collections[0].get_paths()[0].vertices)
+
+	wideCont = cont.allsegs[0][0]
+	narrowCont = cont.allsegs[1][0]
+	#print(wideCont)
+	#print(narrowCont)
+
+	xWide = np.array([x[0] for x in wideCont])
+	yWide = np.array([x[1] for x in wideCont])
+	xNarrow = np.array([x[0] for x in narrowCont])
+	yNarrow = np.array([x[1] for x in narrowCont])
+
+	aWide = fitEllipse(xWide, yWide)
+	aNarrow = fitEllipse(xNarrow, yNarrow)
+	theta = getAngle(aNarrow)
+	lenWideMaj, lenWideMin, swapFlag = getAxLen(aWide)
+
+	lenNarrowMaj, lenNarrowMin, swapFlag = getAxLen(aNarrow)
+	if swapFlag == True:
+		theta = theta + np.pi/2
+
+	xCen, yCen = getAxCen(aNarrow)
+
+	#get positive interpolation xValues
+	numPoints = 50
+	xPos, yPos, xNeg, yNeg = getCoordsInt( 
+		numPoints, lenNarrowMaj, lenWideMaj, xCen, yCen, theta )
 
 
-#plot
-fig, ax = plt.subplots()
-#cont = ax.contourf(xBins, yBins, chi2Array)
-cont = ax.contour(xBins, yBins, pArray, [0.05, 0.35]) 
-#print(cont.collections[0].get_paths()[0].vertices)
+	majPoints = np.linspace(lenNarrowMaj, lenWideMaj, numPoints)
 
-wideCont = cont.allsegs[0][0]
-narrowCont = cont.allsegs[1][0]
-#print(wideCont)
-#print(narrowCont)
-
-xWide = np.array([x[0] for x in wideCont])
-yWide = np.array([x[1] for x in wideCont])
-xNarrow = np.array([x[0] for x in narrowCont])
-yNarrow = np.array([x[1] for x in narrowCont])
-
-aWide = fitEllipse(xWide, yWide)
-aNarrow = fitEllipse(xNarrow, yNarrow)
-theta = getAngle(aWide)
-lenWideMaj, lenWideMin = getAxLen(aWide)
-lenNarrowMaj, lenNarrowMin = getAxLen(aNarrow)
-xCen, yCen = getAxCen(aNarrow)
+	#get for minor axis
+	xPosMin, yPosMin, xNegMin, yNegMin = getCoordsInt( 
+		numPoints, lenNarrowMin, lenWideMin, xCen, yCen, theta-np.pi/2 )
+	minPoints = np.linspace(lenNarrowMin, lenWideMin, numPoints)
 
 
-print(lenWideMaj)
-print(lenNarrowMaj)
+	fig.colorbar(cont, ax=ax)
+	ax.scatter(xPos, yPos, c = 'g', marker='x')
+	ax.scatter(xNeg, yNeg, c = 'g', marker='x')
+	ax.scatter(xPosMin, yPosMin, c = 'r', marker='x')
+	ax.scatter(xNegMin, yNegMin, c = 'r', marker='x')
+	plt.xlabel(wilco1.replace("_",""))
+	plt.ylabel(wilco2.replace("_",""))
+	#plt.show()
+	fig.savefig("contour_plots/rotationtest_{}_{}".format(wilco1.replace("_",""), wilco2.replace("_","")))
+	plt.close()
 
-#get positive interpolation xValues
-numPoints = 50
-xPos, yPos, xNeg, yNeg = getCoordsInt( 
-	numPoints, lenNarrowMaj, lenWideMaj, xCen, yCen, theta )
+	np.savetxt( "analysis_tables/int_vals_maj_{}_{}.txt".format(wilco1, wilco2), np.array( [ 
+			majPoints, xPos, yPos, majPoints, xNeg, yNeg, minPoints, 
+			xPosMin, xNegMin, minPoints, yPosMin, yNegMin ] ) )
 
-majPoints = np.linspace(lenNarrowMaj, lenWideMaj, numPoints)
+if __name__ == "__main__":
+	#calculate p
+	pArray = np.loadtxt("pArray.txt")
+	wilco1 = "qq3_i33i"
+	wilco2 = "qq1_i33i"
 
-#get for minor axis
-xPosMin, yPosMin, xNegMin, yNegMin = getCoordsInt( 
-	numPoints, lenNarrowMin, lenWideMin, xCen, yCen, theta-np.pi/2 )
-minPoints = np.linspace(lenNarrowMin, lenWideMin, numPoints)
+	#plotting noValues*noValues with given x and y ranges
+	noValues = 40
+	xBins = np.linspace(-3, 3, noValues)
+	yBins = np.linspace(-3, 3, noValues)
 
-fig.colorbar(cont, ax=ax)
-ax.scatter(xPos, yPos, c = 'g', marker='x')
-ax.scatter(xNeg, yNeg, c = 'g', marker='x')
-ax.scatter(xPosMin, yPosMin, c = 'r', marker='x')
-ax.scatter(xNegMin, yNegMin, c = 'r', marker='x')
-plt.xlabel(wilco1)
-plt.ylabel(wilco2)
-plt.show()
-fig.savefig("contour_plots/rotationtest_{}_{}".format(wilco1.replace("_",""), wilco2.replace("_","")))
+	getCoordsFromEllipse(xBins, yBins, pArray, wilco1, wilco2)
 
-np.savetxt( "int_vals_maj.txt", np.array( [ 
-		majPoints, xPos, yPos, majPoints, xNeg, yNeg, minPoints, 
-		xPosMin, xNegMin, minPoints, yPosMin, yNegMin ] ) )

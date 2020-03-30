@@ -18,16 +18,14 @@ def plotMut(mutInfReg, indexRef, uniqRef, name, w1, w2):
     length = len(mutInfReg[0])
     bins = range(0, length+1, 1)
     fig, ax = plt.subplots()
-    plotHist(ax, bins, mutInfReg[0])
-    plotHist(ax,bins,mutInfReg[1], colour='r')
+    plotHist(ax, bins, mutInfReg[0], label='Positive values')
+    plotHist(ax,bins,mutInfReg[1], label = 'Negative Values', colour='r')
     plt.xticks(indexRef, uniqRef, fontsize=10, rotation=0, ha='left')
-    #plt.subplots_adjust(bottom=0.2)
     plt.xlabel("Bins of observables")
     plt.ylabel("Mutual info regression score")
-    plt.title("Mutual info for the {} axis of ellipse and for wilcos {} and {}".format(name, w1, w2),
-               fontsize=12)
-    plt.savefig('mutual_info_{}'.format(name))
-    plt.show()
+    plt.legend()
+    plt.savefig('analysis_plots/mutual_info_{}'.format(name))
+    #plt.show()
     plt.close(fig)
 
 def analyse(wilco1="uu_i33i", wilco2="uu_ii33", afPath='../../HDF/CMS_2018_I1662081.h5'):
@@ -49,7 +47,7 @@ def analyse(wilco1="uu_i33i", wilco2="uu_ii33", afPath='../../HDF/CMS_2018_I1662
         wcdict[name] = 0.
 
     #load in analysis from file
-    loadArr = np.loadtxt("int_vals_maj.txt")
+    loadArr = np.loadtxt("analysis_tables/int_vals_maj_{}_{}.txt".format(wilco1, wilco2))
 
     #initialise loop variables
     #pred = np.zeros((loadArr[0].size, len(obs)))
@@ -89,9 +87,8 @@ def analyse(wilco1="uu_i33i", wilco2="uu_ii33", afPath='../../HDF/CMS_2018_I1662
 
     return mutInfs , fh.reference.index
 
-def main():
-    wilco1 = "qq3_i33i"
-    wilco2 = "qq1_i33i"
+def analyseWilcos(wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
+    
     mutInfReg, ref = analyse(wilco1=wilco1, wilco2=wilco2)
 
     #get unique copies of each index
@@ -112,11 +109,8 @@ def main():
     plotMut(mutInfReg[2:4], indexRef, uniqRef, "min", 
             wilco1.replace('_', r'\_'), wilco2.replace('_', r'\_'))
 
-
-    #fig, ax = plt.subplots()
-
     #plt.show()
     return 0
 
 if __name__ == "__main__":
-    main()
+    analyseWilcos()

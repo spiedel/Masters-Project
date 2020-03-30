@@ -1,5 +1,5 @@
 #local 
-ex2/contour_plots/*
+ex2/contour_plots/
 ex2/chi2_extended.txt
 ex2/int_vals_maj.txt
 ex2/pArray.txt

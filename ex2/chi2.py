@@ -27,41 +27,9 @@ def getPred(fh, wcdict):
 	prediction = fh.predict(**wcdict)#iqq3_i33i=wcValue2)#, uG_33=wcValue2)#
 	return [x[0] for x in prediction.values]
 
-if __name__ == "__main__":
-	#wilco1 = "qq3_i33i"
-	#wilco2 = "qq1_i33i"
-	wilco1 = "uu_i33i"
-	wilco2 = "uu_ii33"
 
-	#generate prediction array from data
-	#af = AnalysisFrame.from_hdf('/nfs/topfitter/sbrown/HDF/analyses/ATLAS_2017_I1604029/ATLAS_2017_I1604029.h5')
-	af = AnalysisFrame.from_hdf('../../HDF/CMS_2018_I1662081.h5')
-	pa = PredictionArray(af.xr)
-	fh = FitHandler(pa)
 
-	#get data values and error
-	obs = np.array([x[0] for x in fh.reference.values])
-	err = np.array([x[1] for x in fh.reference.values])
-	print(err)
-
-	wcdict = {}
-	wcnames = pa.wilcos
-	for name in wcnames:
-		wcdict[name] = 0.
-
-	print(pa.wilcos)
-	#print(pa.reference)
-	#print(fh.reference)
-	#print(pa.atpoint(G=1, qq3_i33i=1))
-	#print(chisquare(obs, [x[0] for x in pa.atpoint(G=3, qq3_i33i=3).values]))
-
-	#split by observable? use pa.reference.loc[level, 'value'] to get list instead
-
-	
-	#plotting noValues*noValues with given x and y ranges
-	noValues = 40
-	xBins = np.linspace(-3, 3, noValues)
-	yBins = np.linspace(-3, 3, noValues)
+def getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
 
 	i = 0
 	j = 0
@@ -86,7 +54,7 @@ if __name__ == "__main__":
 	#calculate p
 	pArray = chi2.sf(chi2Array, 2)
 
-	np.savetxt("pArray.txt", pArray)
+	np.savetxt("analysis_tables/pArray_{}_{}.txt".format(wilco1, wilco2), pArray)
 	#print(chi2Array)
 	#print(pArray)
 
@@ -98,5 +66,47 @@ if __name__ == "__main__":
 	fig.colorbar(cont, ax=ax)
 	plt.xlabel(wilco1.replace("_", r"\_"))
 	plt.ylabel(wilco2.replace("_", r"\_"))
-	plt.show()
+	#plt.show()
 	fig.savefig("contour_plots/contours_p_{}_{}.png".format(wilco1, wilco2))
+	plt.close(fig)
+
+	return pArray
+
+def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5'):
+	#generate prediction array from data
+	#af = AnalysisFrame.from_hdf('/nfs/topfitter/sbrown/HDF/analyses/ATLAS_2017_I1604029/ATLAS_2017_I1604029.h5')
+	af = AnalysisFrame.from_hdf(afPath)
+	pa = PredictionArray(af.xr)
+	fh = FitHandler(pa)
+
+	
+	#get data values and error
+	obs = np.array([x[0] for x in fh.reference.values])
+	err = np.array([x[1] for x in fh.reference.values])
+	#print(err)
+
+	wcdict = {}
+	wcnames = pa.wilcos
+	for name in wcnames:
+		wcdict[name] = 0.
+
+	#print(pa.wilcos)
+	#print(pa.reference)
+	#print(fh.reference)
+	#print(pa.atpoint(G=1, qq3_i33i=1))
+	#print(chisquare(obs, [x[0] for x in pa.atpoint(G=3, qq3_i33i=3).values]))
+
+	#split by observable? use pa.reference.loc[level, 'value'] to get list instead
+
+	
+	#plotting noValues*noValues with given x and y ranges
+	noValues = 40
+	xBins = np.linspace(-5, 5, noValues)
+	yBins = np.linspace(-5, 5, noValues)
+
+	return fh, wcdict, noValues, xBins, yBins, obs, err
+
+if __name__ == "__main__":
+	fh, wcdict, noValues, xBins, yBins, obs, err = setupChi2()
+
+	getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err)
