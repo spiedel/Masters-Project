@@ -51,10 +51,7 @@ def comp(data, sim, labelsDict):
 
 if __name__ == "__main__":
     dataList = readFile("data.yoda")
-    dataSL = dataList[:3]
-    dataDL = dataList[3:]
-    simDL = readFile("plots_DL.yoda")[3:]
-    simSL = readFile("plots_SL.yoda")[:3]
+    simList = readFile("out.yoda")
 
     h = yoda.Histo1D
 
@@ -85,8 +82,7 @@ if __name__ == "__main__":
             False]
     }
 
-    comp(dataDL, simDL, labelsDict)
-    comp(dataSL, simSL, labelsDict)
+    comp(dataList, simList, labelsDict)
 
 
     
