@@ -7,6 +7,7 @@ from analysis import analyseWilcos
 fh, wcdict, noValues, xBins, yBins, obs, err = setupChi2()
 
 checkedWilcos = []
+
 for wilco1 in wcdict:
     #remove this key from dict as no longer needs to be compared to 
     checkedWilcos += [wilco1]

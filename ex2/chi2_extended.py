@@ -4,6 +4,7 @@ import numpy as np
 #matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
+from matplotlib.ticker import PercentFormatter
 
 def rotatePoints(x, y, angle):
 	"""Function to rotate a point in x,y space clockwise around the axis by angle radians"""
@@ -83,7 +84,7 @@ def getCoordsInt(number, lenNarrow, lenWide, xCen, yCen, angle):
 	
 	#yPos = np.full(len(posInt), yCen)
 	yPos = np.zeros(len(posInt))
-	yNeg = np.full(len(negInt), -1 * yCen)
+	yNeg = np.zeros(len(negInt))
 
 	xRotPos, yRotPos = rotatePoints(posInt, yPos, angle)
 	xRotNeg, yRotNeg = rotatePoints(negInt, yNeg, angle)
@@ -96,13 +97,14 @@ def getCoordsFromEllipse(xBins, yBins, pArray, wilco1="qq3_i33i", wilco2="qq1_i3
 	#plot
 	fig, ax = plt.subplots()
 	#cont = ax.contourf(xBins, yBins, chi2Array)
-	cont = ax.contour(xBins, yBins, pArray, [0.05, 0.35]) 
+	cont = ax.contour(xBins, yBins, pArray, [0.65, 0.95], colors=('b','r')) 
+
+	#sort labelling
+	ax.clabel(cont, inline=True, fontsize=9, fmt={0.65:r"65%", 0.95:r'95%'})
 	#print(cont.collections[0].get_paths()[0].vertices)
 
 	wideCont = cont.allsegs[0][0]
 	narrowCont = cont.allsegs[1][0]
-	#print(wideCont)
-	#print(narrowCont)
 
 	xWide = np.array([x[0] for x in wideCont])
 	yWide = np.array([x[1] for x in wideCont])
@@ -133,16 +135,17 @@ def getCoordsFromEllipse(xBins, yBins, pArray, wilco1="qq3_i33i", wilco2="qq1_i3
 		numPoints, lenNarrowMin, lenWideMin, xCen, yCen, theta-np.pi/2 )
 	minPoints = np.linspace(lenNarrowMin, lenWideMin, numPoints)
 
-
-	fig.colorbar(cont, ax=ax)
-	ax.scatter(xPos, yPos, c = 'g', marker='x')
-	ax.scatter(xNeg, yNeg, c = 'g', marker='x')
-	ax.scatter(xPosMin, yPosMin, c = 'r', marker='x')
-	ax.scatter(xNegMin, yNegMin, c = 'r', marker='x')
-	plt.xlabel(wilco1.replace("_",""))
-	plt.ylabel(wilco2.replace("_",""))
+	e = Ellipse(xy=(xCen, yCen), width=lenNarrowMaj*2, height=lenNarrowMin*2, angle=theta*180./np.pi)
+	ax.add_artist(e)
+	e.set_alpha(0.5)
+	ax.scatter(xPos, yPos, c = 'c', marker='x')
+	ax.scatter(xNeg, yNeg, c = 'c', marker='x')
+	ax.scatter(xPosMin, yPosMin, c = 'm', marker='x')
+	ax.scatter(xNegMin, yNegMin, c = 'm', marker='x')
+	plt.xlabel(wilco1.replace("_",r"\_"))
+	plt.ylabel(wilco2.replace("_",r"\_"))
 	#plt.show()
-	fig.savefig("contour_plots/rotationtest_{}_{}".format(wilco1.replace("_",""), wilco2.replace("_","")))
+	fig.savefig("contour_plots/rotationtest_{}_{}".format(wilco1, wilco2))
 	plt.close()
 
 	np.savetxt( "analysis_tables/int_vals_maj_{}_{}.txt".format(wilco1, wilco2), np.array( [ 

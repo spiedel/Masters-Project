@@ -52,7 +52,7 @@ def getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 	chi2Array = chi2Array - chi2Array.min()
 
 	#calculate p
-	pArray = chi2.sf(chi2Array, 2)
+	pArray = chi2.cdf(chi2Array, 2)
 
 	np.savetxt("analysis_tables/pArray_{}_{}.txt".format(wilco1, wilco2), pArray)
 	#print(chi2Array)
@@ -62,7 +62,7 @@ def getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 	fig, ax = plt.subplots()
 
 	#cont = ax.contourf(xBins, yBins, chi2Array)
-	cont = ax.contourf(xBins, yBins, pArray, [0.01, 0.05, 0.35, 1.0]) 
+	cont = ax.contourf(xBins, yBins, pArray, [0.0, 0.65, 0.95, 0.99], cmap='viridis_r') 
 	fig.colorbar(cont, ax=ax)
 	plt.xlabel(wilco1.replace("_", r"\_"))
 	plt.ylabel(wilco2.replace("_", r"\_"))
