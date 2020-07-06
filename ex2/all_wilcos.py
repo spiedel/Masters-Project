@@ -1,15 +1,12 @@
-
-
-from chi2 import setupChi2, getPPlot
+from chi2_initial_values import setupChi2, getPPlot
 from chi2_extended import getCoordsFromEllipse
 from analysis import analyseWilcos
+import matplotlib.pyplot as plt
 
 fh, wcdict, noValues, xBins, yBins, obs, err = setupChi2()
 
 checkedWilcos = []
-
 for wilco1 in wcdict:
-    #remove this key from dict as no longer needs to be compared to 
     checkedWilcos += [wilco1]
 
     for wilco2 in wcdict:
@@ -21,3 +18,8 @@ for wilco1 in wcdict:
                 analyseWilcos(wilco1, wilco2)
             except:
                 print("Not elliptical corr")
+                plt.close()
+            
+            del pArray
+
+        

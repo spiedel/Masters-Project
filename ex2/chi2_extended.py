@@ -3,6 +3,7 @@
 import numpy as np
 #matplotlib
 import matplotlib.pyplot as plt
+from matplotlib import rc
 from matplotlib.patches import Ellipse
 from matplotlib.ticker import PercentFormatter
 
@@ -97,19 +98,23 @@ def getCoordsFromEllipse(xBins, yBins, pArray, wilco1="qq3_i33i", wilco2="qq1_i3
 	#plot
 	fig, ax = plt.subplots()
 	#cont = ax.contourf(xBins, yBins, chi2Array)
-	cont = ax.contour(xBins, yBins, pArray, [0.65, 0.95], colors=('b','r')) 
+	cont = ax.contour(xBins, yBins, pArray, [0.68, 0.95], colors=('b','r')) 
 
 	#sort labelling
-	ax.clabel(cont, inline=True, fontsize=9, fmt={0.65:r"65%", 0.95:r'95%'})
-	#print(cont.collections[0].get_paths()[0].vertices)
+	ax.clabel(cont, inline=True, fontsize=9, fmt={0.68:r"68\%", 0.95:r'95\%'})
 
-	wideCont = cont.allsegs[0][0]
-	narrowCont = cont.allsegs[1][0]
+	wideCont = cont.allsegs[1]
+	narrowCont = cont.allsegs[0]
 
-	xWide = np.array([x[0] for x in wideCont])
-	yWide = np.array([x[1] for x in wideCont])
-	xNarrow = np.array([x[0] for x in narrowCont])
-	yNarrow = np.array([x[1] for x in narrowCont])
+	xWide = []; yWide = []
+	for seg in wideCont:
+		xWide = np.append(xWide, [x[0] for x in seg])
+		yWide = np.append(yWide, [x[1] for x in seg])
+		
+	xNarrow = []; yNarrow = []
+	for seg in narrowCont:
+		xNarrow = np.append(xNarrow, [x[0] for x in seg])
+		yNarrow = np.append(yNarrow, [x[1] for x in seg])
 
 	aWide = fitEllipse(xWide, yWide)
 	aNarrow = fitEllipse(xNarrow, yNarrow)
@@ -135,9 +140,14 @@ def getCoordsFromEllipse(xBins, yBins, pArray, wilco1="qq3_i33i", wilco2="qq1_i3
 		numPoints, lenNarrowMin, lenWideMin, xCen, yCen, theta-np.pi/2 )
 	minPoints = np.linspace(lenNarrowMin, lenWideMin, numPoints)
 
-	e = Ellipse(xy=(xCen, yCen), width=lenNarrowMaj*2, height=lenNarrowMin*2, angle=theta*180./np.pi)
-	ax.add_artist(e)
-	e.set_alpha(0.5)
+	eNarrow = Ellipse(xy=(xCen, yCen), width=lenNarrowMaj*2, height=lenNarrowMin*2, angle=theta*180./np.pi)
+	eWide = Ellipse(xy=(xCen, yCen), width=lenWideMaj*2, height=lenWideMin*2, angle=theta*180./np.pi)
+	ax.add_artist(eNarrow)
+	eNarrow.set_alpha(0.5)
+	eWide.set_color('b')
+	ax.add_artist(eWide)
+	eWide.set_alpha(0.1)
+	eWide.set_color('r')
 	ax.scatter(xPos, yPos, c = 'c', marker='x')
 	ax.scatter(xNeg, yNeg, c = 'c', marker='x')
 	ax.scatter(xPosMin, yPosMin, c = 'm', marker='x')
@@ -146,17 +156,21 @@ def getCoordsFromEllipse(xBins, yBins, pArray, wilco1="qq3_i33i", wilco2="qq1_i3
 	plt.ylabel(wilco2.replace("_",r"\_"))
 	#plt.show()
 	fig.savefig("contour_plots/rotationtest_{}_{}".format(wilco1, wilco2))
-	plt.close()
+	plt.close(fig)
 
+	# output = np.array[ majPoints, xPos, yPos, majPoints, xNeg, yNeg, 
+	# 	minPoints, xPosMin, xNegMin, minPoints, yPosMin, yNegMin ]
 	np.savetxt( "analysis_tables/int_vals_maj_{}_{}.txt".format(wilco1, wilco2), np.array( [ 
 			majPoints, xPos, yPos, majPoints, xNeg, yNeg, minPoints, 
-			xPosMin, xNegMin, minPoints, yPosMin, yNegMin ] ) )
+			xPosMin, yPosMin, minPoints, xNegMin, yNegMin ] ) )
 
 if __name__ == "__main__":
+	rc('text', usetex=True)
+
 	#calculate p
-	pArray = np.loadtxt("pArray.txt")
-	wilco1 = "qq3_i33i"
-	wilco2 = "qq1_i33i"
+	wilco1 = "uu_i33i"#"qq3_i33i"#
+	wilco2 = "uu_ii33"#"qq1_i33i"#
+	pArray = np.loadtxt("analysis_tables/pArray_{}_{}.txt".format(wilco1, wilco2))
 
 	#plotting noValues*noValues with given x and y ranges
 	noValues = 40

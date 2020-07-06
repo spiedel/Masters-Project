@@ -20,30 +20,32 @@ def chi2_local(observed, expected, error):
 
 
 
-def getPred(fh, wcdict):
+def getPred(fh, wcdict_tmp):
 	#funtion for predicting the theory values for a given pair of wilson coefficients
 	#{'qq3_i33i', 'G', 'qq1_ii33', 'uu_i33i', 'qu1_33ii', 'qu8_33ii', 'qq1_i33i', 'qu8_ii33', 'qq3_ii33', 'uG_33', 'ud1_33ii', 'qd8_33ii', 'qu1_ii33', 'uu_ii33', 'qd1_33ii', 'ud8_33ii'}
 	#returns
-	prediction = fh.predict(**wcdict)#iqq3_i33i=wcValue2)#, uG_33=wcValue2)#
+	prediction = fh.predict(**wcdict_tmp)
 	return [x[0] for x in prediction.values]
 
 
 
 def getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
 
+	wcdict_tmp = wcdict.copy()
+
 	i = 0
 	j = 0
 	chi2Array = np.zeros((noValues, noValues))
-	for x in xBins:
-		for y in yBins:
-			wcdict[wilco1] = x
-			wcdict[wilco2] = y
-			pred = np.array(getPred(fh, wcdict))
+	for i, x in enumerate(xBins):
+		for j, y in enumerate(yBins):
+			wcdict_tmp[wilco1] = x
+			wcdict_tmp[wilco2] = y
+			pred = np.array(getPred(fh, wcdict_tmp))
 			chi2Value = chi2_local(obs, pred, err)
-			chi2Array[i,j] = chi2Value
-			j+=1
-		j=0
-		i+=1
+			chi2Array[j,i] = chi2Value
+			#j+=1
+		#j=0
+		#i+=1
 	#print(pred)
 
 	#print(chi2Array)
@@ -62,7 +64,7 @@ def getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 	fig, ax = plt.subplots()
 
 	#cont = ax.contourf(xBins, yBins, chi2Array)
-	cont = ax.contourf(xBins, yBins, pArray, [0.0, 0.65, 0.95, 0.99], cmap='viridis_r') 
+	cont = ax.contourf(xBins, yBins, pArray, [0.0, 0.68, 0.95, 0.99], cmap='viridis_r') 
 	fig.colorbar(cont, ax=ax)
 	plt.xlabel(wilco1.replace("_", r"\_"))
 	plt.ylabel(wilco2.replace("_", r"\_"))
@@ -72,7 +74,7 @@ def getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 
 	return pArray
 
-def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5'):
+def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5,5)):
 	#generate prediction array from data
 	#af = AnalysisFrame.from_hdf('/nfs/topfitter/sbrown/HDF/analyses/ATLAS_2017_I1604029/ATLAS_2017_I1604029.h5')
 	af = AnalysisFrame.from_hdf(afPath)
@@ -85,28 +87,19 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5'):
 	err = np.array([x[1] for x in fh.reference.values])
 	#print(err)
 
-	wcdict = {}
+	wcdict_tmp = {}
 	wcnames = pa.wilcos
 	for name in wcnames:
-		wcdict[name] = 0.
-
-	#print(pa.wilcos)
-	#print(pa.reference)
-	#print(fh.reference)
-	#print(pa.atpoint(G=1, qq3_i33i=1))
-	#print(chisquare(obs, [x[0] for x in pa.atpoint(G=3, qq3_i33i=3).values]))
-
-	#split by observable? use pa.reference.loc[level, 'value'] to get list instead
-
+		wcdict_tmp[name] = 0.
 	
 	#plotting noValues*noValues with given x and y ranges
-	noValues = 40
-	xBins = np.linspace(-5, 5, noValues)
-	yBins = np.linspace(-5, 5, noValues)
+	noValues = numvalues
+	xBins = np.linspace(range[0], range[1], noValues)
+	yBins = np.linspace(range[0], range[1], noValues)
 
-	return fh, wcdict, noValues, xBins, yBins, obs, err
+	return fh, wcdict_tmp, noValues, xBins, yBins, obs, err
 
 if __name__ == "__main__":
-	fh, wcdict, noValues, xBins, yBins, obs, err = setupChi2()
+	fh, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
 
-	getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err)
+	getPPlot(fh, wcdict_tmp, noValues, xBins, yBins, obs, err)#wilco1 = 'uu_i33i', wilco2 = 'uu_ii33')
