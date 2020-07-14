@@ -20,16 +20,16 @@ def chi2_local(observed, expected, error):
 
 
 
-def getPred(fh, wcdict_tmp):
+def getPred	pa, wcdict_tmp):
 	#funtion for predicting the theory values for a given pair of wilson coefficients
 	#{'qq3_i33i', 'G', 'qq1_ii33', 'uu_i33i', 'qu1_33ii', 'qu8_33ii', 'qq1_i33i', 'qu8_ii33', 'qq3_ii33', 'uG_33', 'ud1_33ii', 'qd8_33ii', 'qu1_ii33', 'uu_ii33', 'qd1_33ii', 'ud8_33ii'}
 	#returns
-	prediction = fh.predict(**wcdict_tmp)
+	prediction = pa.predict(**wcdict_tmp)
 	return [x[0] for x in prediction.values]
 
 
 
-def getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
+def getPPlot	pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
 
 	wcdict_tmp = wcdict.copy()
 
@@ -40,7 +40,7 @@ def getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 		for j, y in enumerate(yBins):
 			wcdict_tmp[wilco1] = x
 			wcdict_tmp[wilco2] = y
-			pred = np.array(getPred(fh, wcdict_tmp))
+			pred = np.array(getPred	pa, wcdict_tmp))
 			chi2Value = chi2_local(obs, pred, err)
 			chi2Array[j,i] = chi2Value
 			#j+=1
@@ -79,12 +79,13 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 	#af = AnalysisFrame.from_hdf('/nfs/topfitter/sbrown/HDF/analyses/ATLAS_2017_I1604029/ATLAS_2017_I1604029.h5')
 	af = AnalysisFrame.from_hdf(afPath)
 	pa = PredictionArray(af.xr)
-	fh = FitHandler(pa)
+	#fh = FitHandler(pa)
 
 	
 	#get data values and error
-	obs = np.array([x[0] for x in fh.reference.values])
-	err = np.array([x[1] for x in fh.reference.values])
+	pseudoDat = pa.predict()
+	obs = np.array([x[0] for x in	pseudoDat.values])
+	err = np.array([x[1] for x in	pseudoDat.values])
 	#print(err)
 
 	wcdict_tmp = {}
@@ -97,10 +98,11 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 	xBins = np.linspace(range[0], range[1], noValues)
 	yBins = np.linspace(range[0], range[1], noValues)
 
-	return fh, wcdict_tmp, noValues, xBins, yBins, obs, err
+	return	pa, wcdict_tmp, noValues, xBins, yBins, obs, err
 
 if __name__ == "__main__":
-	#fh, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=40, range=(-3,3))
-	fh, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
 
-	getPPlot(fh, wcdict_tmp, noValues, xBins, yBins, obs, err)#wilco1 = 'uu_i33i', wilco2 = 'uu_ii33')
+	#pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=40, range=(-3,3))
+	pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
+
+	getPPlot(pa, wcdict_tmp, noValues, xBins, yBins, obs, err)#wilco1 = 'uu_i33i', wilco2 = 'uu_ii33')
