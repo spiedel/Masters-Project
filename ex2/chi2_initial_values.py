@@ -20,16 +20,16 @@ def chi2_local(observed, expected, error):
 
 
 
-def getPred	pa, wcdict_tmp):
+def getPred(pa, wcdict_tmp):
 	#funtion for predicting the theory values for a given pair of wilson coefficients
 	#{'qq3_i33i', 'G', 'qq1_ii33', 'uu_i33i', 'qu1_33ii', 'qu8_33ii', 'qq1_i33i', 'qu8_ii33', 'qq3_ii33', 'uG_33', 'ud1_33ii', 'qd8_33ii', 'qu1_ii33', 'uu_ii33', 'qd1_33ii', 'ud8_33ii'}
 	#returns
-	prediction = pa.predict(**wcdict_tmp)
+	prediction = pa.atpoint(**wcdict_tmp)
 	return [x[0] for x in prediction.values]
 
 
 
-def getPPlot	pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
+def getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
 
 	wcdict_tmp = wcdict.copy()
 
@@ -40,7 +40,7 @@ def getPPlot	pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 		for j, y in enumerate(yBins):
 			wcdict_tmp[wilco1] = x
 			wcdict_tmp[wilco2] = y
-			pred = np.array(getPred	pa, wcdict_tmp))
+			pred = np.array(getPred(pa, wcdict_tmp))
 			chi2Value = chi2_local(obs, pred, err)
 			chi2Array[j,i] = chi2Value
 			#j+=1
@@ -83,7 +83,7 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 
 	
 	#get data values and error
-	pseudoDat = pa.predict()
+	pseudoDat = pa.atpoint()
 	obs = np.array([x[0] for x in	pseudoDat.values])
 	err = np.array([x[1] for x in	pseudoDat.values])
 	#print(err)

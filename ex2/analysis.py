@@ -65,11 +65,12 @@ def analyse(wilco1="qq3_i33i", wilco2="qq1_i33i", afPath='../../HDF/CMS_2018_I16
     #initialise topfitter objects
     af = AnalysisFrame.from_hdf(afPath)
     pa = PredictionArray(af.xr)
-    fh = FitHandler(pa)
+    #fh = FitHandler(pa)
 
     #get data values and erroraf 
-    obs = np.array([x[0] for x in fh.reference.values])
-    err = np.array([x[1] for x in fh.reference.values])
+    pseudoDat = pa.atpoint()
+    obs = np.array([x[0] for x in pseudoDat.values])
+    err = np.array([x[1] for x in pseudoDat.values])
 
     #initialise dict for wilson coefficients
     wcdict = {}
@@ -95,7 +96,7 @@ def analyse(wilco1="qq3_i33i", wilco2="qq1_i33i", afPath='../../HDF/CMS_2018_I16
             wcdict[wilco1] = wc1
             wcdict[wilco2] = wc2
 
-            binValues = np.full(len(obs), j)#np.array(getPred(fh, wcdict))#
+            binValues = np.full(len(obs), j)#np.array(getPred(pa, wcdict))#
             
 
             pred[j] = np.random.normal(binValues, err)
@@ -119,7 +120,7 @@ def analyse(wilco1="qq3_i33i", wilco2="qq1_i33i", afPath='../../HDF/CMS_2018_I16
         i += 1
 
 
-    return mutInfs, fh.reference.index
+    return mutInfs, pseudoDat.index
 
 def analyseWilcos(wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
     
