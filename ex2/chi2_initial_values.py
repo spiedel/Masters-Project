@@ -100,6 +100,7 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 	return fh, wcdict_tmp, noValues, xBins, yBins, obs, err
 
 if __name__ == "__main__":
+	#fh, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=40, range=(-3,3))
 	fh, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
 
 	getPPlot(fh, wcdict_tmp, noValues, xBins, yBins, obs, err)#wilco1 = 'uu_i33i', wilco2 = 'uu_ii33')
