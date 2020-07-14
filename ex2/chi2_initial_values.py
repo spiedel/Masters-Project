@@ -13,9 +13,13 @@ def chi2_local(observed, expected, error):
 	chi2_sum = 0.
 	for i in range(observed.size):
 	# calculate each chi2 part
-		chi2_part = (observed[i]-expected[i])**2/error[i]
-		chi2_sum = chi2_sum + chi2_part
-
+		print(error[i])
+		if error[i] == 0.:
+			print("Check this ", error[i])
+		else:
+			diff = observed[i] - expected[i]
+			chi2_part = (diff*diff)/(error[i]*error[i])
+			chi2_sum = chi2_sum + chi2_part
 	return chi2_sum
 
 
@@ -25,7 +29,8 @@ def getPred(pa, wcdict_tmp):
 	#{'qq3_i33i', 'G', 'qq1_ii33', 'uu_i33i', 'qu1_33ii', 'qu8_33ii', 'qq1_i33i', 'qu8_ii33', 'qq3_ii33', 'uG_33', 'ud1_33ii', 'qd8_33ii', 'qu1_ii33', 'uu_ii33', 'qd1_33ii', 'ud8_33ii'}
 	#returns
 	prediction = pa.atpoint(**wcdict_tmp)
-	return [x[0] for x in prediction.values]
+
+	return [x[0] for x in prediction.values][1:]
 
 
 
@@ -33,6 +38,7 @@ def getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 
 	wcdict_tmp = wcdict.copy()
 
+	print(err)
 	i = 0
 	j = 0
 	chi2Array = np.zeros((noValues, noValues))
@@ -84,8 +90,8 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 	
 	#get data values and error
 	pseudoDat = pa.atpoint()
-	obs = np.array([x[0] for x in	pseudoDat.values])
-	err = np.array([x[1] for x in	pseudoDat.values])
+	obs = np.array([x[0] for x in pseudoDat.values])[1:]
+	err = np.array([x[1] for x in pseudoDat.values])[1:]
 	#print(err)
 
 	wcdict_tmp = {}
