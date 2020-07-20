@@ -13,9 +13,8 @@ def chi2_local(observed, expected, error):
 	chi2_sum = 0.
 	for i in range(observed.size):
 	# calculate each chi2 part
-		print(error[i])
 		if error[i] == 0.:
-			print("Check this ", error[i])
+			print("Check this ", observed[i], " at point", i)
 		else:
 			diff = observed[i] - expected[i]
 			chi2_part = (diff*diff)/(error[i]*error[i])
@@ -108,7 +107,8 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 
 if __name__ == "__main__":
 
-	#pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=40, range=(-3,3))
-	pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
+	pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=5, range=(-3,3))
+	#pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
+
 
 	getPPlot(pa, wcdict_tmp, noValues, xBins, yBins, obs, err)#wilco1 = 'uu_i33i', wilco2 = 'uu_ii33')
