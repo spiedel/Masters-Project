@@ -28,8 +28,9 @@ def getPred(pa, wcdict_tmp):
 	#{'qq3_i33i', 'G', 'qq1_ii33', 'uu_i33i', 'qu1_33ii', 'qu8_33ii', 'qq1_i33i', 'qu8_ii33', 'qq3_ii33', 'uG_33', 'ud1_33ii', 'qd8_33ii', 'qu1_ii33', 'uu_ii33', 'qd1_33ii', 'ud8_33ii'}
 	#returns
 	prediction = pa.atpoint(**wcdict_tmp)
+	prediction = dropLastValue(prediction)
 
-	return [x[0] for x in prediction.values][1:]
+	return [x[0] for x in prediction.values]
 
 
 
@@ -79,6 +80,22 @@ def getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 
 	return pArray
 
+def dropLastValue(df):
+	last_index = ["",""]
+	toDrop = []
+ 
+	for index in df.index:
+		if index[0] != last_index[0]:
+			toDrop += [index]
+			last_index = index
+	
+	for index in toDrop:
+		df.drop(index)
+
+	return df
+		
+
+
 def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5,5)):
 	#generate prediction array from data
 	#af = AnalysisFrame.from_hdf('/nfs/topfitter/sbrown/HDF/analyses/ATLAS_2017_I1604029/ATLAS_2017_I1604029.h5')
@@ -89,8 +106,9 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 	
 	#get data values and error
 	pseudoDat = pa.atpoint()
-	obs = np.array([x[0] for x in pseudoDat.values])[1:]
-	err = np.array([x[1] for x in pseudoDat.values])[1:]
+	pseudoDat = dropLastValue(pseudoDat)
+	obs = np.array([x[0] for x in pseudoDat.values])
+	err = np.array([x[1] for x in pseudoDat.values])
 	#print(err)
 
 	wcdict_tmp = {}
@@ -107,8 +125,8 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 
 if __name__ == "__main__":
 
-	pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=5, range=(-3,3))
-	#pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
+	#pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=5, range=(-3,3))
+	pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
 
 
 	getPPlot(pa, wcdict_tmp, noValues, xBins, yBins, obs, err)#wilco1 = 'uu_i33i', wilco2 = 'uu_ii33')

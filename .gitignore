@@ -7,6 +7,8 @@ ex2/pArray.txt
 ex2/topfitterEnv/
 *.png
 *.txt
+temp/
+ttxa/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
