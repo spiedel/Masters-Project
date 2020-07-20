@@ -18,7 +18,7 @@ for wilco1 in wcdict:
             pArray = getPPlot(fh, wcdict, noValues, xBins, yBins, obs, err, wilco1, wilco2)
             try:
                 getCoordsFromEllipse(xBins, yBins, pArray, wilco1, wilco2)
-                analyseWilcos(wilco1, wilco2, afPath)
+                analyseWilcos(fh, wcdict, obs, err, wilco1, wilco2)
             except:
                 print("Not elliptical corr")
                 plt.close()

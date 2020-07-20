@@ -59,24 +59,8 @@ def plotDiff(mutInf1, mutInf2, err1, err2, indexRef, uniqRef, name, w1, w2):
     plt.savefig('analysis_plots/handdone/mutual_info_diff_{}_{}_{}.png'.format(name, w1, w2))
     plt.close(fig)
 
-def analyse(wilco1="qq3_i33i", wilco2="qq1_i33i", afPath='../../HDF/CMS_2018_I1662081.h5'):
+def analyse(wcdict, obs, err, wilco1="qq3_i33i", wilco2="qq1_i33i"):
     #get the mutual info score given the list of points in the file
-
-    #initialise topfitter objects
-    af = AnalysisFrame.from_hdf(afPath)
-    pa = PredictionArray(af.xr)
-    #fh = FitHandler(pa)
-
-    #get data values and erroraf 
-    pseudoDat = pa.atpoint()
-    obs = np.array([x[0] for x in pseudoDat.values])
-    err = np.array([x[1] for x in pseudoDat.values])
-
-    #initialise dict for wilson coefficients
-    wcdict = {}
-    wcnames = pa.wilcos
-    for name in wcnames:
-        wcdict[name] = 0.
 
     #load in analysis from file
     loadArr = np.loadtxt("analysis_tables/int_vals_maj_{}_{}.txt".format(wilco1, wilco2))
@@ -120,11 +104,12 @@ def analyse(wilco1="qq3_i33i", wilco2="qq1_i33i", afPath='../../HDF/CMS_2018_I16
         i += 1
 
 
-    return mutInfs, pseudoDat.index
+    return mutInfs
 
-def analyseWilcos(wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
+def analyseWilcos(fh, wcdict, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
     
-    mutInfs, ref = analyse(wilco1=wilco1, wilco2=wilco2)
+    mutInfs = analyse(wcdict, obs, err, wilco1=wilco1, wilco2=wilco2)
+    ref = fh.index
     mutInfs = [mutInfs]
     for i in range(15):
         mutInfs = np.append(mutInfs, [analyse(wilco1=wilco1, wilco2=wilco2)[0]], axis=0)
@@ -155,6 +140,7 @@ def analyseWilcos(wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
     return mutInfReg, mutInfErr, indexRef, uniqRef
 
 if __name__ == "__main__":
+    #TODO fix so can be run as main again
     mut1, err1, index, ref = analyseWilcos("uu_i33i", "uu_ii33")
     mut2, err2, index, ref = analyseWilcos()
 
