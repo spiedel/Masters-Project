@@ -38,7 +38,6 @@ def getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 
 	wcdict_tmp = wcdict.copy()
 
-	print(err)
 	i = 0
 	j = 0
 	chi2Array = np.zeros((noValues, noValues))
@@ -75,7 +74,7 @@ def getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 	plt.xlabel(wilco1.replace("_", r"\_"))
 	plt.ylabel(wilco2.replace("_", r"\_"))
 	#plt.show()
-	fig.savefig("contour_plots/contours_p_{}_{}.png".format(wilco1, wilco2))
+	fig.savefig("contour_plots2/contours_p_{}_{}.png".format(wilco1, wilco2))
 	plt.close(fig)
 
 	return pArray

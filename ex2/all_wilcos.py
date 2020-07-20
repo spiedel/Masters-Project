@@ -4,7 +4,7 @@ from analysis import analyseWilcos
 import matplotlib.pyplot as plt
 
 afPath = "../../HDF/ATLAS_2019_I1707015.h5"
-fh, wcdict, noValues, xBins, yBins, obs, err = setupChi2(afPath, range=(-1,1), numvalues=20)
+fh, wcdict, noValues, xBins, yBins, obs, err = setupChi2(afPath, range=(-1,1), numvalues=10)
 
 #wcdict = {"G":0, "qq3_i33i":0}
 
