@@ -81,16 +81,19 @@ def getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 	return pArray
 
 def dropLastValue(df):
-	last_index = ["",""]
+	last_index = df.index[0]
+	prev_index = ["",""]
 	toDrop = []
+
  
 	for index in df.index:
 		if index[0] != last_index[0]:
-			toDrop += [index]
+			toDrop += [prev_index]
 			last_index = index
-	
+		prev_index = index
+
 	for index in toDrop:
-		df.drop(index)
+		df = df.drop(index)
 
 	return df
 		
@@ -125,8 +128,8 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 
 if __name__ == "__main__":
 
-	#pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=5, range=(-3,3))
-	pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
+	pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=5, range=(-3,3))
+	#pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
 
 
 	getPPlot(pa, wcdict_tmp, noValues, xBins, yBins, obs, err)#wilco1 = 'uu_i33i', wilco2 = 'uu_ii33')

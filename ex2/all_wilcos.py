@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 afPath = "../../HDF/ATLAS_2019_I1707015.h5"
 fh, wcdict, noValues, xBins, yBins, obs, err = setupChi2(afPath, range=(-1,1))
 
-wcdict = {"G":0, "qq3_i33i":0}
+#wcdict = {"G":0, "qq3_i33i":0}
 
 checkedWilcos = []
 for wilco1 in wcdict:
