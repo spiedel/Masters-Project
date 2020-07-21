@@ -25,8 +25,7 @@ def chi2_local(observed, expected, error):
 
 def getPred(pa, wcdict_tmp):
 	#funtion for predicting the theory values for a given pair of wilson coefficients
-	#{'qq3_i33i', 'G', 'qq1_ii33', 'uu_i33i', 'qu1_33ii', 'qu8_33ii', 'qq1_i33i', 'qu8_ii33', 'qq3_ii33', 'uG_33', 'ud1_33ii', 'qd8_33ii', 'qu1_ii33', 'uu_ii33', 'qd1_33ii', 'ud8_33ii'}
-	#returns
+	#returns array of returned prediction values
 	prediction = pa.atpoint(**wcdict_tmp)
 	prediction = dropLastValue(prediction)
 
@@ -35,6 +34,7 @@ def getPred(pa, wcdict_tmp):
 
 
 def getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
+	#function to generated p values and output them as a table and as a plot
 
 	wcdict_tmp = wcdict.copy()
 
@@ -48,13 +48,6 @@ def getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 			pred = np.array(getPred(pa, wcdict_tmp))
 			chi2Value = chi2_local(obs, pred, err)
 			chi2Array[j,i] = chi2Value
-			#j+=1
-		#j=0
-		#i+=1
-	#print(pred)
-
-	#print(chi2Array)
-	#Calculate delta chi2
 
 	chi2Array = chi2Array - chi2Array.min()
 
@@ -80,6 +73,7 @@ def getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err, wilco1 = "qq3_i33i", 
 	return pArray
 
 def dropLastValue(df):
+	#function to drop last value of each observable for closure
 	last_index = df.index[0]
 	prev_index = ["",""]
 	toDrop = []
@@ -99,8 +93,7 @@ def dropLastValue(df):
 
 
 def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5,5)):
-	#generate prediction array from data
-	#af = AnalysisFrame.from_hdf('/nfs/topfitter/sbrown/HDF/analyses/ATLAS_2017_I1604029/ATLAS_2017_I1604029.h5')
+	#load in from hdf and setup general variables
 	af = AnalysisFrame.from_hdf(afPath)
 	pa = PredictionArray(af.xr)
 	#fh = FitHandler(pa)
@@ -111,8 +104,8 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 	pseudoDat = dropLastValue(pseudoDat)
 	obs = np.array([x[0] for x in pseudoDat.values])
 	err = np.array([x[1] for x in pseudoDat.values])
-	#print(err)
 
+	#initialise a dictionary of wilco values
 	wcdict_tmp = {}
 	wcnames = pa.wilcos
 	for name in wcnames:
@@ -127,8 +120,8 @@ def setupChi2(afPath = '../../HDF/CMS_2018_I1662081.h5', numvalues=25, range=(-5
 
 if __name__ == "__main__":
 
-	pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=5, range=(-3,3))
-	#pa, wcdict_tmp, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
+	pa, wcdict, noValues, xBins, yBins, obs, err = setupChi2("../../HDF/ATLAS_2019_I1707015.h5", numvalues=5, range=(-3,3))
+	#pa, wcdict, noValues, xBins, yBins, obs, err = setupChi2(numvalues=40, range=(-3,3))
 
 
-	getPPlot(pa, wcdict_tmp, noValues, xBins, yBins, obs, err)#wilco1 = 'uu_i33i', wilco2 = 'uu_ii33')
+	getPPlot(pa, wcdict, noValues, xBins, yBins, obs, err)

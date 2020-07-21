@@ -40,7 +40,7 @@ def plotMut(mutInfReg, err, indexRef, uniqRef, name, w1, w2):
     plt.close(fig)
 
 def plotDiff(mutInf1, mutInf2, err1, err2, indexRef, uniqRef, name, w1, w2):
-    #function to plot the mutual info score with appropriate labelling
+    #function to plot the difference in two mutual info scores with appropriate labelling
     length = len(mutInf1[0])
     bins = np.array(range(0, length+1, 1))
     fig, ax = plt.subplots()
@@ -59,7 +59,7 @@ def plotDiff(mutInf1, mutInf2, err1, err2, indexRef, uniqRef, name, w1, w2):
     plt.savefig('analysis_plots/handdone/mutual_info_diff_{}_{}_{}.png'.format(name, w1, w2))
     plt.close(fig)
 
-def analyse(wcdict, obs, err, wilco1="qq3_i33i", wilco2="qq1_i33i"):
+def analyse(fh, wcdict, obs, err, wilco1="qq3_i33i", wilco2="qq1_i33i"):
     #get the mutual info score given the list of points in the file
 
     #load in analysis from file
@@ -80,12 +80,10 @@ def analyse(wcdict, obs, err, wilco1="qq3_i33i", wilco2="qq1_i33i"):
             wcdict[wilco1] = wc1
             wcdict[wilco2] = wc2
 
-            binValues = np.full(len(obs), j)#np.array(getPred(pa, wcdict))#
+            binValues = np.array(getPred(fh, wcdict))
             
 
             pred[j] = np.random.normal(binValues, err)
-
-
 
         # fig, ax = plt.subplots()
         # print (pred.shape)
@@ -107,8 +105,9 @@ def analyse(wcdict, obs, err, wilco1="qq3_i33i", wilco2="qq1_i33i"):
     return mutInfs
 
 def analyseWilcos(fh, wcdict, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"):
-    
-    mutInfs = analyse(wcdict, obs, err, wilco1=wilco1, wilco2=wilco2)
+    wcdict_tmp = wcdict.copy()
+
+    mutInfs = analyse(fh, wcdict_tmp, obs, err, wilco1=wilco1, wilco2=wilco2)
     ref = fh.index
     mutInfs = [mutInfs]
     for i in range(15):
@@ -140,8 +139,9 @@ def analyseWilcos(fh, wcdict, obs, err, wilco1 = "qq3_i33i", wilco2 = "qq1_i33i"
     return mutInfReg, mutInfErr, indexRef, uniqRef
 
 if __name__ == "__main__":
-    #TODO fix so can be run as main again
-    mut1, err1, index, ref = analyseWilcos("uu_i33i", "uu_ii33")
-    mut2, err2, index, ref = analyseWilcos()
+    fh, wcdict, noValues, xBins, yBins, obs, err = setupChi2()
+
+    mut1, err1, index, ref = analyseWilcos(fh, wcdict, obs, err, "uu_i33i", "uu_ii33")
+    mut2, err2, index, ref = analyseWilcos(fh, wcdict, obs, err)
 
     plotDiff(mut1, mut2, err1, err2, index, ref, "", "uu_i33i_uu_ii33", "qq3_i33i_qq1_i33i")
